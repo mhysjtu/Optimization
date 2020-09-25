@@ -22,7 +22,7 @@ struct CostFunctor
     template<typename T>
     bool operator()(const T* const x, T* residual)const
     {
-        residual[0] = _a - x[0]; //T(10.0) or 10.0 is both OK
+        residual[0] = _a - x[0]; //T(10.0)-x[0] or 10.0-x[0] is both OK
         return true;
     }
 };
@@ -32,12 +32,14 @@ int main(int argc, char **argv)
     google::InitGoogleLogging(argv[0]);
 
     //problem: 1/2*(a-x)^2, initial value of x is 5.0
+    //the cost function is a-x
     double x = 5.0;
     double a = 20.0;
 
     ceres::Problem problem;
 
-    ceres::CostFunction* cost_function = new ceres::AutoDiffCostFunction<CostFunctor,1,1>(new CostFunctor(a));
+    ceres::CostFunction* cost_function = 
+        new ceres::AutoDiffCostFunction<CostFunctor,1,1>(new CostFunctor(a));
     //template <user-defined-functor, size-of-residual, size-of-param1>
     //what is in () is the constructor of the functor, you can put some  
     problem.AddResidualBlock(cost_function, NULL, &x); //x is the param to be change, which minimize the cost function
